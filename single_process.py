@@ -32,7 +32,7 @@ else:
 
 def single_process():
     rconn = redis.StrictRedis(**USED_REDIS)
-    dao = WeiboWriter(USED_DATABASE)
+    dao = WeiboUserWriter(USED_DATABASE)
     jobs = [ 'http://weibo.com/1681897083/info',  # Yes
             'http://weibo.com/6006659783/info', # Yes
             'http://weibo.com/wendujianzao/info', # NO

@@ -64,7 +64,7 @@ def user_db_writer(results):
     Consummer for topics
     """
     cp = mp.current_process()
-    dao = WeiboWriter(USED_DATABASE)
+    dao = WeiboUserWriter(USED_DATABASE)
     while True:
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write Bozhu Process pid is %d" % (cp.pid)
         try:
@@ -77,7 +77,7 @@ def user_db_writer(results):
 
 def add_jobs(target):
     todo = 0
-    dao = WeiboWriter(USED_DATABASE)
+    dao = WeiboUserWriter(USED_DATABASE)
     jobs = dao.read_new_user_from_db()
     for job in jobs:  # iterate
         todo += 1

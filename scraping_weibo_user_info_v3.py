@@ -14,7 +14,7 @@ from template.weibo_config import (
 )
 from template.weibo_utils import create_processes, pick_rand_ele_from_list
 from weibo_user_spider import WeiboUserSpider
-from template.weibo_user_writer import WeiboUserWriter
+from weibo_user_writer import WeiboUserWriter
 reload(sys)
 sys.setdefaultencoding('utf-8')
 

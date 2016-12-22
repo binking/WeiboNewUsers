@@ -13,7 +13,7 @@ from template.weibo_config import (
     LOCAL_REDIS, QCLOUD_REDIS
 )
 from template.weibo_utils import create_processes, pick_rand_ele_from_list
-from weibo_bozhu_info_spider import BozhuInfoSpider
+from weibo_user_spider import BozhuInfoSpider
 from template.weibo_writer import WeiboWriter
 reload(sys)
 sys.setdefaultencoding('utf-8')

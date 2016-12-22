@@ -113,6 +113,7 @@ class WeiboSpider(Spider):
         text = info_response.text.encode('utf8')
         now_time = dt.now().strftime("%Y-%m-%d %H:%M:%S")
         # catch 404 not found
+        import ipdb; ipdb.set_trace()
         if info_response.url == 'http://weibo.com/sorry?pagenotfound&id_error':
             print "404 Not Found: %s" % self.url
         elif len(info_response.history) > 1:

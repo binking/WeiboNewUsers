@@ -33,7 +33,9 @@ else:
 def single_process():
     rconn = redis.StrictRedis(**USED_REDIS)
     dao = WeiboUserWriter(USED_DATABASE)
-    jobs = [ 'http://weibo.com/1681897083/info',  # Yes
+    jobs = [ 'http://weibo.com/5918966905/info',  
+            'http://weibo.com/6067727492/info' ,
+            'http://weibo.com/1681897083/info',  # Yes
             'http://weibo.com/6006659783/info', # Yes
             'http://weibo.com/wendujianzao/info', # NO
             'http://weibo.com/bbjkxf/info',  # NO
@@ -51,7 +53,8 @@ def single_process():
         spider.gen_html_source()
         res = spider.parse_bozhu_info()
         print res
-        dao.insert_new_user_into_db(res)
+        if res :
+            dao.insert_new_user_into_db(res)
 
 
 if __name__=="__main__":

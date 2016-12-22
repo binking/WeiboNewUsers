@@ -29,7 +29,8 @@ class WeiboUserWriter(DBAccesor):
             SELECT %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
             %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
             %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
-            FROM DUAL WHERE NOT EXISTS(SELECT * FROM WeiboUser WHERE weibo_user_url = %s)
+            FROM DUAL WHERE NOT EXISTS(
+            SELECT * FROM WeiboUser WHERE weibo_user_url = %s)
         """
         insert_label_sql = """
             INSERT INTO WeiboUserLabel(weibo_user_url, label)  
@@ -61,7 +62,7 @@ class WeiboUserWriter(DBAccesor):
             if cursor.executemany(insert_label_sql, 
                 [(uri, label, uri, label) for label in labels]):
                 print '$'*10, "2. Write label SUCCEED."
-        # conn.commit(); cursor.close(); conn.close()
+        conn.commit(); cursor.close(); conn.close()
         return True
 
     @database_error_hunter
@@ -73,7 +74,7 @@ class WeiboUserWriter(DBAccesor):
             AND t.topic_url = twr.topic_url
             AND twr.weibo_url = wc.weibo_url
             ) AS CommentAuthor LEFT JOIN WeiboUser wu ON CommentAuthor.weibocomment_author_url = wu.weibo_user_url 
-            WHERE wu.weibo_user_url IS NULL LIMIT 10
+            WHERE wu.weibo_user_url IS NULL
         """
         conn = self.connect_database()
         cursor = conn.cursor()

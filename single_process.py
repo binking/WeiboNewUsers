@@ -50,6 +50,7 @@ def single_process():
         spider.use_cookie_from_curl(rconn.hget(MANUAL_COOKIES, account))
         spider.gen_html_source()
         res = spider.parse_bozhu_info()
+        print res
         dao.insert_new_user_into_db(res)
 
 

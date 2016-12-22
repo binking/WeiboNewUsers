@@ -1,7 +1,7 @@
 #coding=utf-8
 import traceback
 from datetime import datetime as dt
-from dao import DBAccesor, database_error_hunter
+from template.weibo_writer import DBAccesor, database_error_hunter
 
 
 class WeiboUserWriter(DBAccesor):

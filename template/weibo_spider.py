@@ -12,7 +12,7 @@ from requests.exceptions import (
     ConnectionError, ConnectTimeout,
 )
 from . import Spider
-from template.weibo_utils import extract_cookie_from_curl, retry   
+from weibo_utils import extract_cookie_from_curl, retry   
 from weibo_config import *
 
 weibo_ranks = ['icon_member', 'icon_club', 'icon_female', 'icon_vlady', 'icon_pf_male', 'W_icon_vipstyle']

@@ -9,10 +9,8 @@ from datetime import datetime as dt
 from functools import wraps
 import multiprocessing as mp
 from requests.exceptions import (
-    ProxyError,
-    Timeout,
-    ConnectionError,
-    ConnectTimeout,
+    ProxyError, Timeout,
+    ConnectionError,ConnectTimeout
 )
 from weibo_config import *
 
@@ -39,11 +37,13 @@ def pick_rand_ele_from_list(elements):
     except Exception as e:
         print e
 
+
 def create_processes(func, args, concurrency):
     for _ in range(concurrency):
         sub_proc = mp.Process(target=func, args=args)
         sub_proc.daemon = True
         sub_proc.start()
+
 
 def gen_abuyun_proxy():
     # authorization

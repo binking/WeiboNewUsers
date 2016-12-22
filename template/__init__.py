@@ -11,11 +11,11 @@ from requests.exceptions import (
     ProxyError, Timeout,
     ConnectionError, ConnectTimeout,
 )
-from template.weibo_utils import (
+from weibo_utils import (
     gen_abuyun_proxy, retry,
     handle_proxy_error, handle_sleep
 )
-from template.weibo_config import *
+from weibo_config import *
 
 exc_list = (IndexError, ProxyError, Timeout, ConnectTimeout, ConnectionError, Exception)
 

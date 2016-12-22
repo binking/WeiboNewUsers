@@ -38,31 +38,32 @@ class WeiboWriter(DBAccesor):
         """
         conn = self.connect_database()
         cursor = conn.cursor()
-        cursor.execute(insert_new_user_sql,(
-            clueid, fullpath, realpath, theme, middle,
-            createdate, bucketName, uri, info_dict['weibo_user_url'],
-            info_dict.get('nickname', ''), info_dict.get('gender', ''), 
-            info_dict.get('introduction', ''), info_dict.get('realname', ''),
-            info_dict.get('location', ''), info_dict.get('registration_date', ''),
-            info_dict.get('label', ''), info_dict.get('date_of_birth', ''),
-            info_dict.get('company', ''), info_dict.get('preliminary_school', ''),
-            info_dict.get('middle_school', ''), info_dict.get('high_school', ''),
-            info_dict.get('high_school', ''), info_dict.get('university', ''),
-            info_dict.get('blog_url', ''), info_dict.get('domain', ''),
-            info_dict.get('msn', ''), info_dict.get('qq', ''),
-            info_dict.get('email', ''), info_dict.get('sex_tendancy', ''),
-            info_dict.get('emotion', ''), info_dict.get('blood_type', ''),
-            info_dict.get('focus_num', -1),info_dict.get('fans_num', -1), 
-            info_dict.get('weibo_num', -1), info_dict.get('kol', ''),
-            uri)
-        )
+        if cursor.execute(insert_new_user_sql,(
+                clueid, fullpath, realpath, theme, middle,
+                createdate, bucketName, uri, info_dict['weibo_user_url'],
+                info_dict.get('nickname', ''), info_dict.get('gender', ''), 
+                info_dict.get('introduction', ''), info_dict.get('realname', ''),
+                info_dict.get('location', ''), info_dict.get('registration_date', ''),
+                info_dict.get('label', ''), info_dict.get('date_of_birth', ''),
+                info_dict.get('company', ''), info_dict.get('preliminary_school', ''),
+                info_dict.get('middle_school', ''), info_dict.get('high_school', ''),
+                info_dict.get('high_school', ''), info_dict.get('university', ''),
+                info_dict.get('blog_url', ''), info_dict.get('domain', ''),
+                info_dict.get('msn', ''), info_dict.get('qq', ''),
+                info_dict.get('email', ''), info_dict.get('sex_tendancy', ''),
+                info_dict.get('emotion', ''), info_dict.get('blood_type', ''),
+                info_dict.get('focus_num', -1),info_dict.get('fans_num', -1), 
+                info_dict.get('weibo_num', -1), info_dict.get('kol', ''),
+                uri)):
+            import ipdb; ipdb.set_trace()
+            print '$'*10, "1. Insert %s SUCCEED." % uri
         if info_dict.get('label'):
             labels = info_dict['label'].split(' ')
-            cursor.executemany(insert_label_sql, 
+            if cursor.executemany(insert_label_sql, 
                 [(uri, label, uri, label) for label in labels])
-            print '$'*10, "1. Write label SUCCEED."
-        print '$'*10, "2. Write %s SUCCEED." % uri
-        conn.commit(); cursor.close(); conn.close()
+                import ipdb; ipdb.set_trace()
+                print '$'*10, "2. Write label SUCCEED."
+        # conn.commit(); cursor.close(); conn.close()
         return True
 
     @database_error_hunter
@@ -81,7 +82,7 @@ class WeiboWriter(DBAccesor):
         cursor.execute(select_new_user_sql)
         for res in cursor.fetchall():
             yield res[0]
-            
+
 # insert_new_user_sql = """
 #     INSERT INTO weibouser
 #     (theme, middle, createdate,

@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup as bs
 from template.weibo_utils import catch_parse_error,extract_chinese_info
 from spider.weibo_spider import WeiboSpider
 
+
 class BozhuInfoSpider(WeiboSpider):
     def __init__(self, start_url, account, password, timeout=10, delay=1, proxy={}):
         WeiboSpider.__init__(self, start_url, account, password, timeout=timeout, delay=delay, proxy=proxy)

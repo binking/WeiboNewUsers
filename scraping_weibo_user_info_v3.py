@@ -54,8 +54,8 @@ def user_info_generator(jobs, results, rconn):
             if res:
                 results.put(res)
         except Exception as e:  # no matter what was raised, cannot let process died
-            jobs.put(job) # put job back
             print 'Raised in gen process', str(e)
+            jobs.put(job) # put job back
         jobs.task_done()
 
 
@@ -86,14 +86,12 @@ def add_jobs(target):
 
 def run_all_worker():
     try:
-        # load weibo account into redis cache
-        # r = redis.StrictRedis(**LOCAL_REDIS)
         r = redis.StrictRedis(**USED_REDIS)
         # Producer is on !!!
         jobs = mp.JoinableQueue()
         results = mp.JoinableQueue()
         create_processes(user_info_generator, (jobs, results, r), 4)
-        create_processes(user_db_writer, (results, ), 8)
+        create_processes(user_db_writer, (results, ), 4)
 
         cp = mp.current_process()
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
@@ -113,33 +111,6 @@ def run_all_worker():
         print "+"*10, "jobs' length is ", jobs.qsize()
         print "+"*10, "results' length is ", results.qsize()
 
-
-def single_process():
-    rconn = redis.StrictRedis(**USED_REDIS)
-    todo = 0
-    # dao = WeiboWriter(OUTER_MYSQL)
-    dao = WeiboWriter(USED_DATABASE)
-    # jobs = dao.read_new_user_from_db()\
-    jobs = ['http://weibo.com/6006659783/info', 'http://weibo.com/chaohuofeng/info']
-    for job in jobs:  # iterate
-        todo += 1
-        all_account = rconn.hkeys(MANUAL_COOKIES)
-        if not all_account:  # no any weibo account
-            raise Exception('All of your accounts were Freezed')
-        account = pick_rand_ele_from_list(all_account)
-        # operate spider
-        spider = BozhuInfoSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
-        spider.use_abuyun_proxy()
-        spider.add_request_header()
-        spider.use_cookie_from_curl(rconn.hget(MANUAL_COOKIES, account))
-        try:
-            spider.gen_html_source()
-            res = spider.parse_bozhu_info()
-            print res
-        except Exception as e:
-            print str(e)
-        if todo > 2:
-            break
 
 if __name__=="__main__":
     print "\n\n" + "%s Began Scraped Weibo New Users" % dt.now().strftime("%Y-%m-%d %H:%M:%S") + "\n"

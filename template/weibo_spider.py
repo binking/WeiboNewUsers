@@ -114,24 +114,21 @@ class WeiboSpider(Spider):
         now_time = dt.now().strftime("%Y-%m-%d %H:%M:%S")
         # catch 404 not found
         if info_response.url == 'http://weibo.com/sorry?pagenotfound&id_error':
-            print "4"*10, '0'*10, "4"*10
+            print "404 Not Found: %s" % self.url
         elif len(info_response.history) > 1:
             for redirect in info_response.history:
                 if redirect.status_code == 302:
-                    print "3"*10, "0"*10, "2"*10
+                    print "302 Temporarily Moved: ", self.url
         elif info_response.status_code == 429:
-            raise ConnectionError("Hey, guy, too many requests")
+            raise ConnectionError("429 Too many requests: " + self.url)
         elif len(text) == 0:
-            print 'Access nothing back'
+            print 'Access nothing back: ', self.url
         elif len(text) < 10000:  # Let IndexError disappear
-            print >>open('./html/block_error_%s_%s.html' % (self.account, now_time), 'w'), text
-            raise ConnectionError('Hey, boy, you were blocked..')
+            raise ConnectionError('Blocked: ' + self.url)
         elif text.find('<title>404错误</title>') > 0:  # <title>404错误</title>
-            print >>open('./html/freezed_account_%s_%s.html' % (self.account, now_time), 'w'), text
-            raise ConnectionError('The account were freezed')
+            raise ConnectionError('Freezed: ' + self.url)
         elif 16000<len(info_response.text)<18000:
-            print >>open('./html/ghost_error_%s_%s.html' % (self.account, now_time), 'w'), text
-            raise ConnectionError('Ghost Error, incorrect source code but not freezed')
+            raise ConnectionError('Short source code: ' + self.url)
         if info_response.status_code == 200:
             self.page = text
         time.sleep(self.delay)

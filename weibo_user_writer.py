@@ -4,7 +4,7 @@ from datetime import datetime as dt
 from dao import DBAccesor, database_error_hunter
 
 
-class WeiboWriter(DBAccesor):
+class WeiboUserWriter(DBAccesor):
 
     def __init__(self, db_dict):
         DBAccesor.__init__(self, db_dict)

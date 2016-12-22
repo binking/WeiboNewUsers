@@ -9,7 +9,7 @@ from template.weibo_utils import catch_parse_error,extract_chinese_info
 from template.weibo_spider import WeiboSpider
 
 
-class BozhuInfoSpider(WeiboSpider):
+class WeiboUserSpider(WeiboSpider):
     def __init__(self, start_url, account, password, timeout=10, delay=1, proxy={}):
         WeiboSpider.__init__(self, start_url, account, password, timeout=timeout, delay=delay, proxy=proxy)
         self.info = {}

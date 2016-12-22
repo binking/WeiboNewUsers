@@ -13,8 +13,8 @@ from template.weibo_config import (
     LOCAL_REDIS, QCLOUD_REDIS
 )
 from template.weibo_utils import create_processes, pick_rand_ele_from_list
-from weibo_user_spider import BozhuInfoSpider
-from template.weibo_writer import WeiboWriter
+from weibo_user_spider import WeiboUserSpider
+from template.weibo_user_writer import WeiboUserWriter
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
@@ -44,7 +44,7 @@ def single_process():
             raise Exception('All of your accounts were Freezed')
         account = pick_rand_ele_from_list(all_account)
         # operate spider
-        spider = BozhuInfoSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
+        spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
         spider.use_abuyun_proxy()
         spider.add_request_header()
         spider.use_cookie_from_curl(rconn.hget(MANUAL_COOKIES, account))

@@ -113,9 +113,12 @@ class WeiboSpider(Spider):
         text = info_response.text.encode('utf8')
         now_time = dt.now().strftime("%Y-%m-%d %H:%M:%S")
         # catch 404 not found
-        import ipdb; ipdb.set_trace()
-        if info_response.url == 'http://weibo.com/sorry?pagenotfound&id_error':
-            print "404 Not Found: %s" % self.url
+        if 'pagenotfound' in info_response.url == :
+            # 'http://weibo.com/sorry?pagenotfound&id_error'
+            print "抱歉，你访问的页面地址有误，或者该页面不存在: %s" % self.url
+        elif 'code=20003' in info_response.url:
+            # http://weibo.com/sorry?userblock&is_viewer&code=20003
+            print '抱歉，您当前访问的帐号异常，暂时无法访问。(20003): %s' % self.url
         elif len(info_response.history) > 1:
             for redirect in info_response.history:
                 if redirect.status_code == 302:

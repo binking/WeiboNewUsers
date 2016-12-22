@@ -17,6 +17,9 @@ from template.weibo_utils import (
 )
 from template.weibo_config import *
 
+exc_list = (IndexError, ProxyError, Timeout, ConnectTimeout, ConnectionError, Exception)
+
+
 class AsySpider(object):  
     """A simple class of asynchronous spider."""
     def __init__(self, urls, concurrency=10, results=None, **kwargs):

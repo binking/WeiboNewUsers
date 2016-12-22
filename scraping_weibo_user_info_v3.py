@@ -7,7 +7,7 @@ import traceback
 from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
-from config.weibo_config import (
+from template.weibo_config import (
     WEIBO_MANUAL_COOKIES, WEIBO_ACCOUNT_PASSWD,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS

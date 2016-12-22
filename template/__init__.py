@@ -12,9 +12,8 @@ from requests.exceptions import (
     ConnectionError, ConnectTimeout,
 )
 from template.weibo_utils import (
-    gen_abuyun_proxy, retry
+    gen_abuyun_proxy, retry,
     handle_proxy_error, handle_sleep
-    # catch_network_error,  
 )
 from template.weibo_config import *
 

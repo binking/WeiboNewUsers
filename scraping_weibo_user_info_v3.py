@@ -37,7 +37,7 @@ def user_info_generator(jobs, results, rconn):
     cp = mp.current_process()
     while True:
         res = {}
-        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate Bozhu Process pid is %d" % (cp.pid)
+        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         try:
             job = jobs.get()
             all_account = rconn.hkeys(MANUAL_COOKIES)
@@ -66,7 +66,7 @@ def user_db_writer(results):
     cp = mp.current_process()
     dao = WeiboUserWriter(USED_DATABASE)
     while True:
-        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write Bozhu Process pid is %d" % (cp.pid)
+        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
         try:
             res = results.get()
             dao.insert_new_user_into_db(res)

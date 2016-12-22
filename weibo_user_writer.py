@@ -60,7 +60,7 @@ class WeiboUserWriter(DBAccesor):
         if info_dict.get('label'):
             labels = info_dict['label'].split(' ')
             if cursor.executemany(insert_label_sql, 
-                [(uri, label, uri, label) for label in labels])
+                [(uri, label, uri, label) for label in labels]):
                 import ipdb; ipdb.set_trace()
                 print '$'*10, "2. Write label SUCCEED."
         # conn.commit(); cursor.close(); conn.close()

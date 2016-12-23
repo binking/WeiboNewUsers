@@ -43,6 +43,7 @@ def user_info_generator(jobs, results, rconn):
         try:
             job = jobs.get()
             if rconn.sismember(INACTIVE_USER, job):
+                print '%s is not active' % job
                 continue
             all_account = rconn.hkeys(MANUAL_COOKIES)
             if not all_account:  # no any weibo account

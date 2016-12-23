@@ -75,6 +75,7 @@ class WeiboUserWriter(DBAccesor):
             AND twr.weibo_url = wc.weibo_url
             ) AS CommentAuthor LEFT JOIN WeiboUser wu ON CommentAuthor.weibocomment_author_url = wu.weibo_user_url 
             WHERE wu.weibo_user_url IS NULL
+            AND wu.is_active='Y'
         """
         conn = self.connect_database()
         cursor = conn.cursor()

@@ -18,6 +18,8 @@ from weibo_user_writer import WeiboUserWriter
 reload(sys)
 sys.setdefaultencoding('utf-8')
 
+INACTIVE_USER = 'weibo:inactive:users'
+
 if os.environ.get('SPIDER_ENV') == 'test':
     print "*"*10, "Run in Test environment"
     USED_DATABASE = OUTER_MYSQL
@@ -40,6 +42,8 @@ def user_info_generator(jobs, results, rconn):
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         try:
             job = jobs.get()
+            if rconn.sismember(INACTIVE_USER, job):
+                continue
             all_account = rconn.hkeys(MANUAL_COOKIES)
             if not all_account:  # no any weibo account
                 raise Exception('All of your accounts were Freezed')
@@ -49,7 +53,9 @@ def user_info_generator(jobs, results, rconn):
             spider.add_request_header()
             spider.use_cookie_from_curl(rconn.hget(MANUAL_COOKIES, account))
         
-            spider.gen_html_source()
+            status = spider.gen_html_source()
+            if status in [404, 20003]:
+                rconn.sadd(INACTIVE_USER, spider.url)
             res = spider.parse_bozhu_info()
             if res:
                 results.put(res)

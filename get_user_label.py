@@ -12,8 +12,7 @@ from config.weibo_config import (
     OUTER_MYSQL,
     REDIS_SETTING,
     ACTIVATED_COOKIE,
-    WEIBO_ACCOUNT_PASSWD,
-    WEIBO_ACCOUNT_LIST,
+    WEIBO_ACCOUNT_PASSWD
 )
 from utils import pick_rand_ele_from_list
 from utils.weibo_utils import gen_cookie
@@ -38,7 +37,6 @@ def user_info_generator(user_jobs, info_results, rconn):
             # all_account = rconn.hkeys(ACTIVATED_COOKIE)
             # if not all_account:  # no any weibo account
             #     raise Exception('All of your accounts were Freezed')
-            # account = pick_rand_ele_from_list(WEIBO_ACCOUNT_LIST)
             auth = 'm0257361yingchen@163.com--tttt5555'
             account, password = auth.split('--')
             # operate spider

@@ -1,7 +1,7 @@
 #coding=utf-8
 import traceback
 from datetime import datetime as dt
-from template.weibo_writer import DBAccesor, database_error_hunter
+from zc_spider.weibo_writer import DBAccesor, database_error_hunter
 
 
 class WeiboUserWriter(DBAccesor):
@@ -12,11 +12,10 @@ class WeiboUserWriter(DBAccesor):
     def connect_database(self):
         return DBAccesor.connect_database(self)
 
-    @database_error_hunter
-    def insert_new_user_into_db(self, info_dict):
-        uri = info_dict['uri']; clueid = ''; fullpath = uri
+    def insert_new_user_into_db(self, info):
+        uri = info['uri']; clueid = ''; fullpath = uri
         realpath = uri; middle = 'default'; bucketName = 'follower'
-        theme = '新浪微博_博主详细信息48992_daily'
+        theme = '新浪微博_博主详细信息python_daily'
         createdate = dt.now().strftime("%Y-%m-%d %H:%M:%S")
         insert_new_user_sql = """
             INSERT INTO WeiboUser (clueid, fullpath, realpath, 
@@ -41,28 +40,28 @@ class WeiboUserWriter(DBAccesor):
         cursor = conn.cursor()
         if cursor.execute(insert_new_user_sql,(
                 clueid, fullpath, realpath, theme, middle,
-                createdate, bucketName, uri, info_dict['weibo_user_url'],
-                info_dict.get('nickname', ''), info_dict.get('gender', ''), 
-                info_dict.get('introduction', ''), info_dict.get('realname', ''),
-                info_dict.get('location', ''), info_dict.get('registration_date', ''),
-                info_dict.get('label', ''), info_dict.get('date_of_birth', ''),
-                info_dict.get('company', ''), info_dict.get('preliminary_school', ''),
-                info_dict.get('middle_school', ''), info_dict.get('high_school', ''),
-                info_dict.get('high_school', ''), info_dict.get('university', ''),
-                info_dict.get('blog_url', ''), info_dict.get('domain', ''),
-                info_dict.get('msn', ''), info_dict.get('qq', ''),
-                info_dict.get('email', ''), info_dict.get('sex_tendancy', ''),
-                info_dict.get('emotion', ''), info_dict.get('blood_type', ''),
-                info_dict.get('focus_num', -1),info_dict.get('fans_num', -1), 
-                info_dict.get('weibo_num', -1), info_dict.get('kol', ''),
+                createdate, bucketName, uri, info['weibo_user_url'],
+                info.get('nickname', ''), info.get('gender', ''), 
+                info.get('introduction', ''), info.get('realname', ''),
+                info.get('location', ''), info.get('registration_date', ''),
+                info.get('label', ''), info.get('date_of_birth', ''),
+                info.get('company', ''), info.get('preliminary_school', ''),
+                info.get('middle_school', ''), info.get('high_school', ''),
+                info.get('high_school', ''), info.get('university', ''),
+                info.get('blog_url', ''), info.get('domain', ''),
+                info.get('msn', ''), info.get('qq', ''),
+                info.get('email', ''), info.get('sex_tendancy', ''),
+                info.get('emotion', ''), info.get('blood_type', ''),
+                info.get('focus_num', 0),info.get('fans_num', 0), 
+                info.get('weibo_num', 0), info.get('kol', ''),
                 uri)):
             print '$'*10, "1. Insert %s SUCCEED." % uri
-        if info_dict.get('label'):
-            labels = info_dict['label'].split(' ')
+        if info.get('label'):
+            labels = info['label'].split(' ')
             if cursor.executemany(insert_label_sql, 
                 [(uri, label, uri, label) for label in labels]):
                 print '$'*10, "2. Write label SUCCEED."
-        conn.commit(); cursor.close(); conn.close()
+        # conn.commit(); cursor.close(); conn.close()
         return True
 
     @database_error_hunter

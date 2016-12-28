@@ -3,16 +3,17 @@ import os
 import sys
 import time
 import redis
+import random
 import traceback
 from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
-from template.weibo_config import (
+from zc_spider.weibo_config import (
     WEIBO_MANUAL_COOKIES, WEIBO_ACCOUNT_PASSWD,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS
 )
-from template.weibo_utils import create_processes, pick_rand_ele_from_list
+from zc_spider.weibo_utils import create_processes, pick_rand_ele_from_list
 from weibo_user_spider import WeiboUserSpider
 from weibo_user_writer import WeiboUserWriter
 reload(sys)
@@ -44,7 +45,7 @@ def single_process():
         all_account = rconn.hkeys(MANUAL_COOKIES)
         if not all_account:  # no any weibo account
             raise Exception('All of your accounts were Freezed')
-        account = pick_rand_ele_from_list(all_account)
+        account = random.choice(all_account)
         # operate spider
         spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
         spider.use_abuyun_proxy()

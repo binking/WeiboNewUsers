@@ -3,22 +3,22 @@ import os
 import sys
 import time
 import redis
+import pickle
+import random
 import traceback
 from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
-from template.weibo_config import (
+from zc_spider.weibo_config import (
     WEIBO_MANUAL_COOKIES, WEIBO_ACCOUNT_PASSWD,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
-    LOCAL_REDIS, QCLOUD_REDIS
+    LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE
 )
-from template.weibo_utils import create_processes, pick_rand_ele_from_list
+from zc_spider.weibo_utils import create_processes
 from weibo_user_spider import WeiboUserSpider
 from weibo_user_writer import WeiboUserWriter
 reload(sys)
 sys.setdefaultencoding('utf-8')
-
-INACTIVE_USER = 'weibo:inactive:users'
 
 if os.environ.get('SPIDER_ENV') == 'test':
     print "*"*10, "Run in Test environment"
@@ -32,7 +32,7 @@ else:
     raise Exception("Unknown Environment, Check it now...")
 
 
-def user_info_generator(jobs, results, rconn):
+def generate_info(cache):
     """
     Producer for urls and topics, Consummer for topics
     """
@@ -41,32 +41,30 @@ def user_info_generator(jobs, results, rconn):
         res = {}
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         try:
-            job = jobs.get()
-            if rconn.sismember(INACTIVE_USER, job):
-                print '%s is not active' % job
+            job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
+            if cache.sismember(INACTIVE_USER_CACHE, job):
+                print 'Inactive user: %s' % job
                 continue
-            all_account = rconn.hkeys(MANUAL_COOKIES)
+            all_account = cache.hkeys(MANUAL_COOKIES)
             if not all_account:  # no any weibo account
-                raise Exception('All of your accounts were Freezed')
-            account = pick_rand_ele_from_list(all_account)
+                raise Exception('No account can be used')
+            account = random.choice(all_account)
             spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
             spider.use_abuyun_proxy()
             spider.add_request_header()
-            spider.use_cookie_from_curl(rconn.hget(MANUAL_COOKIES, account))
-        
+            spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, account))
             status = spider.gen_html_source()
             if status in [404, 20003]:
-                rconn.sadd(INACTIVE_USER, spider.url)
+                cache.sadd(INACTIVE_USER_CACHE, spider.url)
             res = spider.parse_bozhu_info()
             if res:
-                results.put(res)
+                cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))
         except Exception as e:  # no matter what was raised, cannot let process died
             print 'Raised in gen process', str(e)
-            jobs.put(job) # put job back
-        jobs.task_done()
+            cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
+        
 
-
-def user_db_writer(results):
+def user_db_writer(cache):
     """
     Consummer for topics
     """
@@ -74,13 +72,13 @@ def user_db_writer(results):
     dao = WeiboUserWriter(USED_DATABASE)
     while True:
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
+        res = cache.blpop(PEOPLE_RESULTS_CACHE, 0)[1]
         try:
-            res = results.get()
-            dao.insert_new_user_into_db(res)
+            dao.insert_new_user_into_db(pickle.loads(res))
         except Exception as e:  # won't let you died
             print 'Raised in gen process', str(e)
-            results.put(res)
-        results.task_done()
+            cache.rpush(PEOPLE_RESULTS_CACHE, res)
+
 
 def add_jobs(target):
     todo = 0

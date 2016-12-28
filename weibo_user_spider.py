@@ -5,8 +5,8 @@ import time
 import requests
 from datetime import datetime as dt
 from bs4 import BeautifulSoup as bs
-from template.weibo_utils import catch_parse_error,extract_chinese_info
-from template.weibo_spider import WeiboSpider
+from zc_spider.weibo_utils import catch_parse_error,extract_chinese_info
+from zc_spider.weibo_spider import WeiboSpider
 
 
 class WeiboUserSpider(WeiboSpider):

@@ -61,7 +61,7 @@ class WeiboUserWriter(DBAccesor):
             if cursor.executemany(insert_label_sql, 
                 [(uri, label, uri, label) for label in labels]):
                 print '$'*10, "2. Write label SUCCEED."
-        # conn.commit(); cursor.close(); conn.close()
+        conn.commit(); cursor.close(); conn.close()
         return True
 
     @database_error_hunter

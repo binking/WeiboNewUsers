@@ -70,11 +70,12 @@ class WeiboUserWriter(DBAccesor):
         select_new_user_sql = """
             SELECT DISTINCT concat(CommentAuthor.weibocomment_author_url, '/info') FROM 
             (SELECT  wc.weibocomment_author_url FROM topicinfo t, topicweiborelation twr, weibocomment wc
-            WHERE t.createdate > date_sub(now(), INTERVAL '7' DAY)
+            WHERE t.createdate > date_sub(now(), INTERVAL '1' DAY)
             AND t.topic_url = twr.topic_url
             AND twr.weibo_url = wc.weibo_url
             ) AS CommentAuthor LEFT JOIN WeiboUser wu ON CommentAuthor.weibocomment_author_url = wu.weibo_user_url 
             WHERE wu.weibo_user_url IS NULL
+            -- Update one day user per day
         """
         conn = self.connect_database()
         cursor = conn.cursor()

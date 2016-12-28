@@ -12,7 +12,8 @@ from requests.exceptions import ConnectionError
 from zc_spider.weibo_config import (
     WEIBO_MANUAL_COOKIES, WEIBO_ACCOUNT_PASSWD,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
-    LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE
+    LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE,
+    PEOPLE_JOBS_CACHE, PEOPLE_RESULTS_CACHE
 )
 from zc_spider.weibo_utils import create_processes
 from weibo_user_spider import WeiboUserSpider

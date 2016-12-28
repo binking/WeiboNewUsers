@@ -64,7 +64,7 @@ def generate_info(cache):
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
         
 
-def user_db_writer(cache):
+def write_data(cache):
     """
     Consummer for topics
     """
@@ -83,43 +83,47 @@ def user_db_writer(cache):
 def add_jobs(target):
     todo = 0
     dao = WeiboUserWriter(USED_DATABASE)
-    jobs = dao.read_new_user_from_db()
-    for job in jobs:  # iterate
+    for job in dao.read_new_user_from_db():  # iterate
         todo += 1
-        target.put(job)
+        target.rpush(PEOPLE_JOBS_CACHE, job)
+    print 'There are totally %d jobs to process' % todo
     return todo
 
-def run_all_worker():
-    try:
-        r = redis.StrictRedis(**USED_REDIS)
-        # Producer is on !!!
-        jobs = mp.JoinableQueue()
-        results = mp.JoinableQueue()
-        create_processes(user_info_generator, (jobs, results, r), 4)
-        create_processes(user_db_writer, (results, ), 4)
 
-        cp = mp.current_process()
-        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
-        num_of_users = add_jobs(jobs)
-        print "<"*10,
-        print "There are %d users to process" % num_of_users, 
-        print ">"*10
-        jobs.join()
-        results.join()
-        print "+"*10, "jobs' length is ", jobs.qsize()
-        print "+"*10, "results' length is ", results.qsize()
+def run_all_worker():
+    r = redis.StrictRedis(**USED_REDIS)
+    if not job_cache.llen(PEOPLE_JOBS_CACHE):
+        create_processes(add_jobs, (r, ), 1)
+        print "Add jobs DONE, and I quit..."
+        return 0
+    else:
+        print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
+    # Producer is on !!!
+    job_pool = mp.Pool(processes=1,
+        initializer=generate_info, initargs=(r, ))
+    result_pool = mp.Pool(processes=1, 
+        initializer=write_data, initargs=(r, ))
+
+    cp = mp.current_process()
+    print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
+    try:
+        job_pool.close()
+        result_pool.close()
+        job_pool.join()
+        result_pool.join()
+        print "+"*10, "jobs' length is ", r.llen(PEOPLE_JOBS_CACHE) 
+        print "+"*10, "results' length is ", r.llen(PEOPLE_RESULTS_CACHE)
     except Exception as e:
         traceback.print_exc()
-        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Exception raise in runn all Work"
+        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Exception raise in run all Work"
     except KeyboardInterrupt:
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Interrupted by you and quit in force, but save the results"
-        print "+"*10, "jobs' length is ", jobs.qsize()
-        print "+"*10, "results' length is ", results.qsize()
+        print "+"*10, "jobs' length is ", r.llen(PEOPLE_JOBS_CACHE) 
+        print "+"*10, "results' length is ", r.llen(PEOPLE_RESULTS_CACHE)
 
 
 if __name__=="__main__":
     print "\n\n" + "%s Began Scraped Weibo New Users" % dt.now().strftime("%Y-%m-%d %H:%M:%S") + "\n"
     start = time.time()
     run_all_worker()
-    # single_process()
     print "*"*10, "Totally Scraped Weibo New Users Time Consumed : %d seconds" % (time.time() - start), "*"*10

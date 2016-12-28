@@ -92,7 +92,7 @@ def add_jobs(target):
 
 def run_all_worker():
     r = redis.StrictRedis(**USED_REDIS)
-    if not job_cache.llen(PEOPLE_JOBS_CACHE):
+    if not r.llen(PEOPLE_JOBS_CACHE):
         create_processes(add_jobs, (r, ), 1)
         print "Add jobs DONE, and I quit..."
         return 0

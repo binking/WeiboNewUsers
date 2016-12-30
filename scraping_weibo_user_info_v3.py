@@ -10,12 +10,13 @@ from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
 from zc_spider.weibo_config import (
-    WEIBO_MANUAL_COOKIES, WEIBO_ACCOUNT_PASSWD,
+    WEIBO_ACCOUNT_PASSWD,
+    WEIBO_ERROR_TIME, WEIBO_ACCESS_TIME,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE,
     PEOPLE_JOBS_CACHE, PEOPLE_RESULTS_CACHE  # weibo:people:urls, weibo:people:info
 )
-from zc_spider.weibo_utils import create_processes
+from zc_spider.weibo_utils import RedisException
 from weibo_user_spider import WeiboUserSpider
 from weibo_user_writer import WeiboUserWriter
 reload(sys)
@@ -31,6 +32,38 @@ elif 'centos' in os.environ.get('HOSTNAME'):
     USED_REDIS = QCLOUD_REDIS
 else:
     raise Exception("Unknown Environment, Check it now...")
+CURRENT_ACCOUNT = ''
+
+def init_current_account(cache):
+    print 'Initializing weibo account'
+    global CURRENT_ACCOUNT
+    CURRENT_ACCOUNT = cache.hkeys(MANUAL_COOKIES)[0]
+    print '1', CURRENT_ACCOUNT
+    cache.set(WEIBO_CURRENT_ACCOUNT, CURRENT_ACCOUNT)
+    cache.set(WEIBO_ACCESS_TIME, 0)
+    cache.set(WEIBO_ERROR_TIME, 0)
+    
+
+def switch_account(cache):
+    global CURRENT_ACCOUNT
+    if cache.get(WEIBO_ERROR_TIME) and int(cache.get(WEIBO_ERROR_TIME)) > 99:  # error count
+        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), 'Swithching weibo account'
+        expired_account = cache.get(WEIBO_CURRENT_ACCOUNT)
+        access_times = cache.get(WEIBO_ACCESS_TIME)
+        error_times = cache.get(WEIBO_ERROR_TIME)
+        print "Account(%s) access %s times but failed %s times" % (expired_account, access_times, error_times)
+        cache.hdel(MANUAL_COOKIES, expired_account)
+        if len(cache.hkeys(MANUAL_COOKIES)) == 0:
+            raise RedisException('All Weibo Accounts were run out of')
+        else:
+            new_account = cache.hkeys(MANUAL_COOKIES)[0]
+        # init again
+        cache.set(WEIBO_CURRENT_ACCOUNT, new_account)
+        cache.set(WEIBO_ACCESS_TIME, 0)
+        cache.set(WEIBO_ERROR_TIME, 0)
+        CURRENT_ACCOUNT = new_account
+    else:
+        CURRENT_ACCOUNT = cache.get(WEIBO_CURRENT_ACCOUNT)
 
 
 def generate_info(cache):
@@ -46,6 +79,8 @@ def generate_info(cache):
             if error_count > 999:
                 print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
                 break
+            switch_account(cache)
+            cache.incr(WEIBO_ACCESS_TIME)
             job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
             if cache.sismember(INACTIVE_USER_CACHE, job):
                 print 'Inactive user: %s' % job
@@ -65,8 +100,9 @@ def generate_info(cache):
             if res:
                 cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))
         except Exception as e:  # no matter what was raised, cannot let process died
-            print 'Raised in gen process', str(e)
+            print 'Failed to parse job: ', job
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
+            cache.incr(WEIBO_ERROR_TIME)
             error_count += 1
         
 
@@ -87,7 +123,7 @@ def write_data(cache):
             dao.insert_new_user_into_db(pickle.loads(res))
         except Exception as e:  # won't let you died
             error_count += 1
-            print 'Raised in gen process', str(e)
+            print 'Failed to write result: ', str((pickle.loads(res)))
             cache.rpush(PEOPLE_RESULTS_CACHE, res)
 
 

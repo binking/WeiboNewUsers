@@ -40,8 +40,12 @@ def generate_info(cache):
     cp = mp.current_process()
     while True:
         res = {}
+        error_count = 0
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         try:
+            if error_count > 999:
+                print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
+                break
             job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
             if cache.sismember(INACTIVE_USER_CACHE, job):
                 print 'Inactive user: %s' % job
@@ -63,20 +67,26 @@ def generate_info(cache):
         except Exception as e:  # no matter what was raised, cannot let process died
             print 'Raised in gen process', str(e)
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
+            error_count += 1
         
 
 def write_data(cache):
     """
     Consummer for topics
     """
+    error_count = 0
     cp = mp.current_process()
     dao = WeiboUserWriter(USED_DATABASE)
     while True:
+        if error_count > 999:
+            print '>'*10, 'Exceed 1000 times of write errors', '<'*10
+            break
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
         res = cache.blpop(PEOPLE_RESULTS_CACHE, 0)[1]
         try:
             dao.insert_new_user_into_db(pickle.loads(res))
         except Exception as e:  # won't let you died
+            error_count += 1
             print 'Raised in gen process', str(e)
             cache.rpush(PEOPLE_RESULTS_CACHE, res)
 

@@ -70,10 +70,10 @@ def generate_info(cache):
     """
     Producer for urls and topics, Consummer for topics
     """
+    error_count = 0
     cp = mp.current_process()
     while True:
         res = {}
-        error_count = 0
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
         try:
@@ -95,6 +95,9 @@ def generate_info(cache):
             res = spider.parse_bozhu_info()
             if res:
                 cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))
+        except RedisException as e:
+            print str(e)
+            break
         except Exception as e:  # no matter what was raised, cannot let process died
             traceback.print_exc()
             print 'Failed to parse job: ', job

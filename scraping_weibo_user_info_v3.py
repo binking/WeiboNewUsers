@@ -143,9 +143,9 @@ def run_all_worker():
     else:
         print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
     # Producer is on !!!
-    job_pool = mp.Pool(processes=1,
+    job_pool = mp.Pool(processes=8,
         initializer=generate_info, initargs=(r, ))
-    result_pool = mp.Pool(processes=1, 
+    result_pool = mp.Pool(processes=4, 
         initializer=write_data, initargs=(r, ))
 
     cp = mp.current_process()

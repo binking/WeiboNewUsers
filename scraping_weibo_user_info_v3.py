@@ -75,24 +75,20 @@ def generate_info(cache):
         res = {}
         error_count = 0
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
+        job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
         try:
             if error_count > 999:
                 print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
                 break
             switch_account(cache)
             cache.incr(WEIBO_ACCESS_TIME)
-            job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
             if cache.sismember(INACTIVE_USER_CACHE, job):
                 print 'Inactive user: %s' % job
                 continue
-            all_account = cache.hkeys(MANUAL_COOKIES)
-            if not all_account:  # no any weibo account
-                raise Exception('No account can be used')
-            account = random.choice(all_account)
-            spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
+            spider = WeiboUserSpider(job, CURRENT_ACCOUNT, WEIBO_ACCOUNT_PASSWD, timeout=20)
             spider.use_abuyun_proxy()
             # spider.add_request_header()
-            spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, account))
+            spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, CURRENT_ACCOUNT))
             status = spider.gen_html_source()
             if status in [404, 20003]:
                 cache.sadd(INACTIVE_USER_CACHE, spider.url)
@@ -100,6 +96,7 @@ def generate_info(cache):
             if res:
                 cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))
         except Exception as e:  # no matter what was raised, cannot let process died
+            traceback.print_exc()
             print 'Failed to parse job: ', job
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
             cache.incr(WEIBO_ERROR_TIME)

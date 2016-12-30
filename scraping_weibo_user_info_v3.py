@@ -52,7 +52,7 @@ def generate_info(cache):
             account = random.choice(all_account)
             spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
             spider.use_abuyun_proxy()
-            spider.add_request_header()
+            # spider.add_request_header()
             spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, account))
             status = spider.gen_html_source()
             if status in [404, 20003]:
@@ -100,9 +100,9 @@ def run_all_worker():
     else:
         print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
     # Producer is on !!!
-    job_pool = mp.Pool(processes=8,
+    job_pool = mp.Pool(processes=4,
         initializer=generate_info, initargs=(r, ))
-    result_pool = mp.Pool(processes=4, 
+    result_pool = mp.Pool(processes=2, 
         initializer=write_data, initargs=(r, ))
 
     cp = mp.current_process()

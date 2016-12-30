@@ -10,7 +10,7 @@ from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
 from zc_spider.weibo_config import (
-    WEIBO_ACCOUNT_PASSWD, WEIBO_CURRENT_ACCOUNT
+    WEIBO_ACCOUNT_PASSWD, WEIBO_CURRENT_ACCOUNT,
     WEIBO_ERROR_TIME, WEIBO_ACCESS_TIME,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE,

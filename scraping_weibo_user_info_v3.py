@@ -39,9 +39,10 @@ def init_current_account(cache):
     global CURRENT_ACCOUNT
     CURRENT_ACCOUNT = cache.hkeys(MANUAL_COOKIES)[0]
     print '1', CURRENT_ACCOUNT
-    cache.set(WEIBO_CURRENT_ACCOUNT, CURRENT_ACCOUNT)
-    cache.set(WEIBO_ACCESS_TIME, 0)
-    cache.set(WEIBO_ERROR_TIME, 0)
+    if not cache.get(WEIBO_CURRENT_ACCOUNT):
+        cache.set(WEIBO_CURRENT_ACCOUNT, CURRENT_ACCOUNT)
+        cache.set(WEIBO_ACCESS_TIME, 0)
+        cache.set(WEIBO_ERROR_TIME, 0)
     
 
 def switch_account(cache):
@@ -54,6 +55,9 @@ def switch_account(cache):
         print "Account(%s) access %s times but failed %s times" % (expired_account, access_times, error_times)
         cache.hdel(MANUAL_COOKIES, expired_account)
         if len(cache.hkeys(MANUAL_COOKIES)) == 0:
+            cache.delete(WEIBO_CURRENT_ACCOUNT)
+            cache.set(WEIBO_ACCESS_TIME, 0)
+            cache.set(WEIBO_ERROR_TIME, 0)
             raise RedisException('All Weibo Accounts were run out of')
         else:
             new_account = cache.hkeys(MANUAL_COOKIES)[0]
@@ -62,9 +66,10 @@ def switch_account(cache):
         cache.set(WEIBO_ACCESS_TIME, 0)
         cache.set(WEIBO_ERROR_TIME, 0)
         CURRENT_ACCOUNT = new_account
-    else:
+    elif cache.get(WEIBO_CURRENT_ACCOUNT):
         CURRENT_ACCOUNT = cache.get(WEIBO_CURRENT_ACCOUNT)
-
+    else:
+        raise Exception('Unknown Account Error')
 
 def generate_info(cache):
     """
@@ -145,7 +150,7 @@ def run_all_worker():
         return 0
     else:
         print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
-    # Producer is on !!!
+    init_current_account(r)
     job_pool = mp.Pool(processes=8,
         initializer=generate_info, initargs=(r, ))
     result_pool = mp.Pool(processes=4, 

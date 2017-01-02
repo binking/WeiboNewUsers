@@ -71,6 +71,7 @@ def switch_account(cache):
     else:
         raise Exception('Unknown Account Error')
 
+
 def generate_info(cache):
     """
     Producer for urls and topics, Consummer for topics
@@ -85,15 +86,17 @@ def generate_info(cache):
             if error_count > 999:
                 print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
                 break
-            switch_account(cache)
-            cache.incr(WEIBO_ACCESS_TIME)
+            # switch_account(cache)
+            # cache.incr(WEIBO_ACCESS_TIME)
             if cache.sismember(INACTIVE_USER_CACHE, job):
                 print 'Inactive user: %s' % job
                 continue
-            spider = WeiboUserSpider(job, CURRENT_ACCOUNT, WEIBO_ACCOUNT_PASSWD, timeout=20)
+            all_account = cache.hkeys(MANUAL_COOKIES)
+            account = random.choice(all_account)
+            spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
             spider.use_abuyun_proxy()
             # spider.add_request_header()
-            spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, CURRENT_ACCOUNT))
+            spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, account))
             status = spider.gen_html_source()
             if status in [404, 20003]:
                 cache.sadd(INACTIVE_USER_CACHE, spider.url)
@@ -107,7 +110,7 @@ def generate_info(cache):
             traceback.print_exc()
             print 'Failed to parse job: ', job
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
-            cache.incr(WEIBO_ERROR_TIME)
+            # cache.incr(WEIBO_ERROR_TIME)
             error_count += 1
         
 
@@ -150,7 +153,7 @@ def run_all_worker():
         return 0
     else:
         print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
-    init_current_account(r)
+    # init_current_account(r)
     job_pool = mp.Pool(processes=8,
         initializer=generate_info, initargs=(r, ))
     result_pool = mp.Pool(processes=4, 
@@ -159,10 +162,8 @@ def run_all_worker():
     cp = mp.current_process()
     print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
     try:
-        job_pool.close()
-        result_pool.close()
-        job_pool.join()
-        result_pool.join()
+        job_pool.close(); result_pool.close()
+        job_pool.join(); result_pool.join()
         print "+"*10, "jobs' length is ", r.llen(PEOPLE_JOBS_CACHE) 
         print "+"*10, "results' length is ", r.llen(PEOPLE_RESULTS_CACHE)
     except Exception as e:

@@ -88,7 +88,7 @@ def generate_info(cache):
                 break
             # switch_account(cache)
             # cache.incr(WEIBO_ACCESS_TIME)
-            if cache.sismember(INACTIVE_USER_CACHE, job):
+            if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
                 print 'Inactive user: %s' % job
                 continue
             all_account = cache.hkeys(MANUAL_COOKIES)

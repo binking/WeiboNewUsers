@@ -11,7 +11,6 @@ import multiprocessing as mp
 from requests.exceptions import ConnectionError
 from zc_spider.weibo_config import (
     WEIBO_ACCOUNT_PASSWD, WEIBO_CURRENT_ACCOUNT,
-    WEIBO_ERROR_TIME, WEIBO_ACCESS_TIME,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE,
     PEOPLE_JOBS_CACHE, PEOPLE_RESULTS_CACHE  # weibo:people:urls, weibo:people:info
@@ -34,43 +33,6 @@ else:
     raise Exception("Unknown Environment, Check it now...")
 CURRENT_ACCOUNT = ''
 
-def init_current_account(cache):
-    print 'Initializing weibo account'
-    global CURRENT_ACCOUNT
-    CURRENT_ACCOUNT = cache.hkeys(MANUAL_COOKIES)[0]
-    print '1', CURRENT_ACCOUNT
-    if not cache.get(WEIBO_CURRENT_ACCOUNT):
-        cache.set(WEIBO_CURRENT_ACCOUNT, CURRENT_ACCOUNT)
-        cache.set(WEIBO_ACCESS_TIME, 0)
-        cache.set(WEIBO_ERROR_TIME, 0)
-    
-
-def switch_account(cache):
-    global CURRENT_ACCOUNT
-    if cache.get(WEIBO_ERROR_TIME) and int(cache.get(WEIBO_ERROR_TIME)) > 9999:  # error count
-        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), 'Swithching weibo account'
-        expired_account = cache.get(WEIBO_CURRENT_ACCOUNT)
-        access_times = cache.get(WEIBO_ACCESS_TIME)
-        error_times = cache.get(WEIBO_ERROR_TIME)
-        print "Account(%s) access %s times but failed %s times" % (expired_account, access_times, error_times)
-        cache.hdel(MANUAL_COOKIES, expired_account)
-        if len(cache.hkeys(MANUAL_COOKIES)) == 0:
-            cache.delete(WEIBO_CURRENT_ACCOUNT)
-            cache.set(WEIBO_ACCESS_TIME, 0)
-            cache.set(WEIBO_ERROR_TIME, 0)
-            raise RedisException('All Weibo Accounts were run out of')
-        else:
-            new_account = cache.hkeys(MANUAL_COOKIES)[0]
-        # init again
-        cache.set(WEIBO_CURRENT_ACCOUNT, new_account)
-        cache.set(WEIBO_ACCESS_TIME, 0)
-        cache.set(WEIBO_ERROR_TIME, 0)
-        CURRENT_ACCOUNT = new_account
-    elif cache.get(WEIBO_CURRENT_ACCOUNT):
-        CURRENT_ACCOUNT = cache.get(WEIBO_CURRENT_ACCOUNT)
-    else:
-        raise Exception('Unknown Account Error')
-
 
 def generate_info(cache):
     """
@@ -86,8 +48,6 @@ def generate_info(cache):
             if error_count > 999:
                 print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
                 break
-            # switch_account(cache)
-            # cache.incr(WEIBO_ACCESS_TIME)
             if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
                 print 'Inactive user: %s' % job
                 continue
@@ -110,7 +70,6 @@ def generate_info(cache):
             traceback.print_exc()
             print 'Failed to parse job: ', job
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
-            # cache.incr(WEIBO_ERROR_TIME)
             error_count += 1
         
 
@@ -153,7 +112,6 @@ def run_all_worker():
         return 0
     else:
         print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
-    # init_current_account(r)
     job_pool = mp.Pool(processes=8,
         initializer=generate_info, initargs=(r, ))
     result_pool = mp.Pool(processes=4, 

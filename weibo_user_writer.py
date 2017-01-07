@@ -67,13 +67,15 @@ class WeiboUserWriter(DBAccesor):
     @database_error_hunter
     def read_new_user_from_db(self):
         select_new_user_sql = """
-            SELECT DISTINCT concat(CommentAuthor.weibocomment_author_url, '/info') FROM 
-            (SELECT  wc.weibocomment_author_url FROM topicinfo t, topicweiborelation twr, weibocomment wc
-            WHERE t.createdate > date_sub(now(), INTERVAL '1' DAY)
+            SELECT DISTINCT concat(CommentAuthor.weibocomment_author_url, '/info') FROM (
+            SELECT wc.weibocomment_author_url 
+            FROM topicinfo t, topicweiborelation twr, weibocomment wc
+            WHERE t.createdate > date_sub(now(), INTERVAL '3' DAY)
             AND t.topic_url = twr.topic_url
-            AND twr.weibo_url = wc.weibo_url
-            ) AS CommentAuthor LEFT JOIN WeiboUser wu ON CommentAuthor.weibocomment_author_url = wu.weibo_user_url 
-            WHERE wu.weibo_user_url IS NULL
+            AND twr.weibo_url = wc.weibo_url) AS CommentAuthor 
+            WHERE NOT EXISTS (
+            SELECT 1 FROM WeiboUser wu 
+            WHERE CommentAuthor.weibocomment_author_url = wu.weibo_user_url) 
             -- Update one day user per day
         """
         conn = self.connect_database()

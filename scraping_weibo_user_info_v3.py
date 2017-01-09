@@ -10,7 +10,7 @@ from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
 from zc_spider.weibo_config import (
-    WEIBO_ACCOUNT_PASSWD, WEIBO_CURRENT_ACCOUNT,
+    WEIBO_ACCOUNT_PASSWD,
     MANUAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE,
     PEOPLE_JOBS_CACHE, PEOPLE_RESULTS_CACHE  # weibo:people:urls, weibo:people:info
@@ -31,7 +31,6 @@ elif 'centos' in os.environ.get('HOSTNAME'):
     USED_REDIS = QCLOUD_REDIS
 else:
     raise Exception("Unknown Environment, Check it now...")
-CURRENT_ACCOUNT = ''
 
 
 def generate_info(cache):
@@ -60,6 +59,7 @@ def generate_info(cache):
             status = spider.gen_html_source()
             if status == 404:
                 cache.sadd(INACTIVE_USER_CACHE, spider.url)
+                continue
             res = spider.parse_bozhu_info()
             if res:
                 cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))

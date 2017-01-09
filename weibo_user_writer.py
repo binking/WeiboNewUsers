@@ -70,7 +70,7 @@ class WeiboUserWriter(DBAccesor):
             SELECT DISTINCT concat(CommentAuthor.weibocomment_author_url, '/info') FROM (
             SELECT wc.weibocomment_author_url 
             FROM topicinfo t, topicweiborelation twr, weibocomment wc
-            WHERE t.createdate > date_sub(now(), INTERVAL '3' DAY)
+            WHERE t.createdate > date_sub(now(), INTERVAL '5' DAY)
             AND t.topic_url = twr.topic_url
             AND twr.weibo_url = wc.weibo_url) AS CommentAuthor 
             WHERE NOT EXISTS (

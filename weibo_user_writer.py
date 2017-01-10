@@ -20,12 +20,12 @@ class WeiboUserWriter(DBAccesor):
         insert_new_user_sql = """
             INSERT INTO WeiboUser (clueid, fullpath, realpath, 
             theme,  middle, createdate, bucketName,
-            uri, weibo_user_url, nickname, gender, introduction, realname, location, 
+            uri, weibo_user_url,weibo_user_card, nickname, gender, introduction, realname, location, 
             registration_date, label, date_of_birth, company,preliminary_school,
             middle_school, high_school, tech_school, university, blog_url, domain, 
             msn, QQ, email, sex_tendancy, emotion, blood_type, focus_num, fans_num, 
             weibo_num , KOL)
-            SELECT %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
+            SELECT %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
             %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
             %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
             FROM DUAL WHERE NOT EXISTS(

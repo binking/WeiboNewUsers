@@ -21,6 +21,7 @@ class WeiboUserSpider(WeiboSpider):
         if len(self.page) < 20000:
             return res
         # Parse game is on !!!
+        usercard_repx = re.search()  # $CONFIG['oid']='1780836045'; 
         cut_code = '\n'.join(self.page.split('\n')[100:])
         elminate_white = re.sub(r'\\r|\\t|\\n', '', cut_code)
         elminate_quote = re.sub(r'\\"', '"', elminate_white)

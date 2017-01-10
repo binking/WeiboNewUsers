@@ -13,21 +13,27 @@ class WeiboUserWriter(DBAccesor):
         return DBAccesor.connect_database(self)
 
     def insert_new_user_into_db(self, info):
-        uri = info['uri']; clueid = ''; fullpath = uri
+        uri = info['uri']; fullpath = uri
         realpath = uri; middle = 'default'; bucketName = 'follower'
         theme = '新浪微博_博主详细信息python_daily'
         createdate = dt.now().strftime("%Y-%m-%d %H:%M:%S")
         insert_new_user_sql = """
-            INSERT INTO WeiboUser (clueid, fullpath, realpath, 
-            theme,  middle, createdate, bucketName,
-            uri, weibo_user_url,weibo_user_card, nickname, gender, introduction, realname, location, 
-            registration_date, label, date_of_birth, company,preliminary_school,
-            middle_school, high_school, tech_school, university, blog_url, domain, 
-            msn, QQ, email, sex_tendancy, emotion, blood_type, focus_num, fans_num, 
-            weibo_num , KOL)
-            SELECT %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
-            %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,
-            %s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s
+            INSERT INTO WeiboUser (
+            fullpath, realpath, theme,  middle, createdate, 
+            bucketName, uri, weibo_user_url, weibo_user_card, nickname, 
+            gender, introduction, realname, location, registration_date, 
+            label, date_of_birth, company,preliminary_school, middle_school, 
+            high_school, tech_school, university, blog_url, domain, 
+            msn, QQ, email, sex_tendancy, emotion, 
+            blood_type, focus_num, fans_num, weibo_num, KOL)
+            SELECT 
+            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s,
             FROM DUAL WHERE NOT EXISTS(
             SELECT * FROM WeiboUser WHERE weibo_user_url = %s)
         """
@@ -39,8 +45,8 @@ class WeiboUserWriter(DBAccesor):
         conn = self.connect_database()
         cursor = conn.cursor()
         if cursor.execute(insert_new_user_sql,(
-                clueid, fullpath, realpath, theme, middle,
-                createdate, bucketName, uri, info['weibo_user_url'], info['uid'],
+                fullpath, realpath, theme, middle,createdate, 
+                bucketName, uri, info['weibo_user_url'], info['uid'],
                 info.get('nickname', ''), info.get('gender', ''), 
                 info.get('introduction', ''), info.get('realname', ''),
                 info.get('location', ''), info.get('registration_date', ''),

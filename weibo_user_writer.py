@@ -22,7 +22,7 @@ class WeiboUserWriter(DBAccesor):
             fullpath, realpath, theme,  middle, createdate, 
             bucketName, uri, weibo_user_url, weibo_user_card, nickname, 
             gender, introduction, realname, location, registration_date, 
-            label, date_of_birth, company,preliminary_school, middle_school, 
+            label, date_of_birth, company, preliminary_school, middle_school, 
             high_school, tech_school, university, blog_url, domain, 
             msn, QQ, email, sex_tendancy, emotion, 
             blood_type, focus_num, fans_num, weibo_num, KOL)
@@ -33,7 +33,7 @@ class WeiboUserWriter(DBAccesor):
             %s,%s,%s,%s,%s,
             %s,%s,%s,%s,%s,
             %s,%s,%s,%s,%s,
-            %s,%s,%s,%s,%s,
+            %s,%s,%s,%s,%s 
             FROM DUAL WHERE NOT EXISTS(
             SELECT * FROM WeiboUser WHERE weibo_user_url = %s)
         """

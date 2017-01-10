@@ -57,7 +57,7 @@ def generate_info(cache):
             # spider.add_request_header()
             spider.use_cookie_from_curl(cache.hget(MANUAL_COOKIES, account))
             status = spider.gen_html_source()
-            if status == 404:
+            if status in [404, 20003]:
                 cache.sadd(INACTIVE_USER_CACHE, spider.url)
                 continue
             res = spider.parse_bozhu_info()

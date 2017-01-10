@@ -40,7 +40,7 @@ class WeiboUserWriter(DBAccesor):
         cursor = conn.cursor()
         if cursor.execute(insert_new_user_sql,(
                 clueid, fullpath, realpath, theme, middle,
-                createdate, bucketName, uri, info['weibo_user_url'], info['uid']
+                createdate, bucketName, uri, info['weibo_user_url'], info['uid'],
                 info.get('nickname', ''), info.get('gender', ''), 
                 info.get('introduction', ''), info.get('realname', ''),
                 info.get('location', ''), info.get('registration_date', ''),

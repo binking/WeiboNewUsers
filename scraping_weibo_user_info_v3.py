@@ -71,6 +71,7 @@ def generate_info(cache):
             print 'Failed to parse job: ', job
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
             error_count += 1
+        time.sleep(2)
         
 
 def write_data(cache):

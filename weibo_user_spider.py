@@ -22,7 +22,7 @@ class WeiboUserSpider(WeiboSpider):
             return res
         # Parse game is on !!!
         usercard_repx = re.search(r"\$CONFIG\['oid'\]='(\d+)'", self.page)  # $CONFIG['oid']='1780836045'; 
-        if usercard_repx
+        if usercard_repx:
             self.info['uid'] = usercard_repx.group(1)
         else:
             return res

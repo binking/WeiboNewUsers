@@ -90,6 +90,23 @@ class WeiboUserWriter(DBAccesor):
         for res in cursor.fetchall():
             yield res[0]
 
+    @database_error_hunter
+    def select_specified_users(self):
+        select_sql = """
+        SELECT DISTINCT concat(wc.weibocomment_author_url, '/info')
+        FROM weibouserblogs wub, weibocomment wc
+        WHERE wub.weibo_url=wc.weibo_url
+        AND not EXISTS(
+        SELECT * FROM weibouser wu
+        WHERE wu.weibo_user_url = wc.weibocomment_author_url
+        );
+        """
+        conn = self.connect_database()
+        cursor = conn.cursor()
+        cursor.execute(select_new_user_sql)
+        for res in cursor.fetchall():
+            yield res[0]
+
 """
 What is cursor ???
 _result None

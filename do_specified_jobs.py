@@ -107,7 +107,7 @@ def add_jobs(target):
 
 def run_all_worker():
     r = redis.StrictRedis(**USED_REDIS)
-    if not r.llen(PEOPLE_JOBS_CACHE):
+    if r.llen(PEOPLE_JOBS_CACHE):
         add_jobs(r)
         print "Add jobs DONE, and I quit..."
         return 0

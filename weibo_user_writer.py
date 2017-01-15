@@ -91,22 +91,20 @@ class WeiboUserWriter(DBAccesor):
             yield res[0]
 
     @database_error_hunter
-    def select_specified_users(self):
+    def read_repost_user_from_db(self):
         select_sql = """
-        SELECT DISTINCT concat(wc.weibocomment_author_url, '/info')
-        FROM weibouserblogs wub, weibocomment wc
-        WHERE wub.weibo_url=wc.weibo_url
-        AND not EXISTS(
-        SELECT * FROM weibouser wu
-        WHERE wu.weibo_user_url = wc.weibocomment_author_url
-        );
+            SELECT DISTINCT CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
+            FROM weiboreposts wr
+            -- where not EXISTS (
+            -- select * from weibouser wu
+            -- where wu.weibo_user_card=wr.weibo_user_id
+            -- );
         """
         conn = self.connect_database()
         cursor = conn.cursor()
         cursor.execute(select_new_user_sql)
         for res in cursor.fetchall():
             yield res[0]
-
 """
 What is cursor ???
 _result None

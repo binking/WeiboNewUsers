@@ -98,7 +98,7 @@ def write_data(cache):
 def add_jobs(target):
     todo = 0
     dao = WeiboUserWriter(USED_DATABASE)
-    for job in dao.select_specified_users():  # iterate
+    for job in dao.read_repost_user_from_db():  # iterate
         todo += 1
         # target.rpush(PEOPLE_JOBS_CACHE, job)
     print 'There are totally %d jobs to process' % todo

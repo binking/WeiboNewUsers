@@ -102,7 +102,7 @@ class WeiboUserWriter(DBAccesor):
         """
         conn = self.connect_database()
         cursor = conn.cursor()
-        cursor.execute(select_new_user_sql)
+        cursor.execute(select_sql)
         for res in cursor.fetchall():
             yield res[0]
 """

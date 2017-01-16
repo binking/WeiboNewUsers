@@ -94,11 +94,13 @@ class WeiboUserWriter(DBAccesor):
     def read_repost_user_from_db(self):
         select_sql = """
             SELECT DISTINCT CONCAT('http://weibo.com/', wp.weibo_user_id , '/info')
-            FROM weiboreposts wp
-            WHERE NOT EXISTS (
+            FROM weibouserblogs wub, weiboreposts wp
+            WHERE wub.weibo_mid = wp.weibo_mid
+            AND wub.weibo_usercard in ('1839190372', '1679387303', '2274552170', '1737522625', '2010873464', '1907060853')
+            AND NOT EXISTS (
             SELECT * FROM weibouser wu
-            WHERE wu.weibo_user_card=wp.weibo_user_id
-            AND wu.createdate > '2017-01-14 00:00:00')
+            WHERE wu.weibo_user_card=wp.weibo_user_id);
+            -- 有多少用户还没有信息, 小胖的需求重在信息
         """
         conn = self.connect_database()
         cursor = conn.cursor()

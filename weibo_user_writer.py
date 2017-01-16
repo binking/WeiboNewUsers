@@ -93,8 +93,12 @@ class WeiboUserWriter(DBAccesor):
     @database_error_hunter
     def read_repost_user_from_db(self):
         select_sql = """
-            SELECT DISTINCT CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
-            FROM weiboreposts wr
+            SELECT  CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
+            FROM weibouserblogs wub, weiboreposts wr 
+            WHERE wub.weibo_mid = wr.weibo_mid
+            AND wub.weibo_usercard IN ('1865091063','3937348351', '2491855213', '2778292197');
+            -- SELECT DISTINCT CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
+            -- FROM weiboreposts wr
             -- where not EXISTS (
             -- select * from weibouser wu
             -- where wu.weibo_user_card=wr.weibo_user_id

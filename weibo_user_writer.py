@@ -93,7 +93,7 @@ class WeiboUserWriter(DBAccesor):
     @database_error_hunter
     def read_repost_user_from_db(self):
         select_sql = """
-            SELECT DISTINCT wp.weibo_user_id
+            SELECT DISTINCT CONCAT('http://weibo.com/', wp.weibo_user_id , '/info')
             FROM weiboreposts wp
             WHERE NOT EXISTS (
             SELECT * FROM weibouser wu

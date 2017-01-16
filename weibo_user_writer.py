@@ -93,16 +93,12 @@ class WeiboUserWriter(DBAccesor):
     @database_error_hunter
     def read_repost_user_from_db(self):
         select_sql = """
-            SELECT  CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
-            FROM weibouserblogs wub, weiboreposts wr 
-            WHERE wub.weibo_mid = wr.weibo_mid
-            AND wub.weibo_usercard IN ('1865091063','3937348351', '2491855213', '2778292197');
-            -- SELECT DISTINCT CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
-            -- FROM weiboreposts wr
-            -- where not EXISTS (
-            -- select * from weibouser wu
-            -- where wu.weibo_user_card=wr.weibo_user_id
-            -- );
+            SELECT DISTINCT wp.weibo_user_id
+            FROM weiboreposts wp
+            WHERE NOT EXISTS (
+            SELECT * FROM weibouser wu
+            WHERE wu.weibo_user_card=wp.weibo_user_id
+            AND wu.createdate > '2017-01-14 00:00:00')
         """
         conn = self.connect_database()
         cursor = conn.cursor()
@@ -110,6 +106,16 @@ class WeiboUserWriter(DBAccesor):
         for res in cursor.fetchall():
             yield res[0]
 """
+-- SELECT  CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
+-- FROM weibouserblogs wub, weiboreposts wr 
+-- WHERE wub.weibo_mid = wr.weibo_mid
+-- AND wub.weibo_usercard IN ('1865091063','3937348351', '2491855213', '2778292197');
+-- SELECT DISTINCT CONCAT('http://weibo.com/', wr.weibo_user_id , '/info')
+-- FROM weiboreposts wr
+-- where not EXISTS (
+-- select * from weibouser wu
+-- where wu.weibo_user_card=wr.weibo_user_id
+-- );
 What is cursor ???
 _result None
 description None

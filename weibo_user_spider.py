@@ -81,7 +81,7 @@ class WeiboUserSpider(WeiboSpider):
             elif '大学' in attr:
                 self.info['university'] = extract_chinese_info(value)
             elif '中专技校' in attr:
-                self.ifno['tech_school'] = extract_chinese_info(value)
+                self.info['tech_school'] = extract_chinese_info(value)
             elif '高中' in attr:
                 self.info['high_school'] = extract_chinese_info(value)
             elif '标签' in attr:

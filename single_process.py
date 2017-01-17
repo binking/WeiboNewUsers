@@ -34,13 +34,7 @@ else:
 def single_process():
     rconn = redis.StrictRedis(**USED_REDIS)
     dao = WeiboUserWriter(USED_DATABASE)
-    jobs = [ 'http://weibo.com/5918966905/info',  
-            'http://weibo.com/6067727492/info' ,
-            'http://weibo.com/1681897083/info',  # Yes
-            'http://weibo.com/6006659783/info', # Yes
-            'http://weibo.com/wendujianzao/info', # NO
-            'http://weibo.com/bbjkxf/info',  # NO
-            'http://weibo.com/1741566651/info']  # Yes
+    jobs = [ 'http://weibo.com/5748853526/info' ]  # Yes
     for job in jobs:  # iterate
         all_account = rconn.hkeys(MANUAL_COOKIES)
         if not all_account:  # no any weibo account

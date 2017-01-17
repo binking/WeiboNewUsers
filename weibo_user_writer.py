@@ -53,7 +53,7 @@ class WeiboUserWriter(DBAccesor):
                 info.get('label', ''), info.get('date_of_birth', ''),
                 info.get('company', ''), info.get('preliminary_school', ''),
                 info.get('middle_school', ''), info.get('high_school', ''),
-                info.get('high_school', ''), info.get('university', ''),
+                info.get('tech_school', ''), info.get('university', ''),
                 info.get('blog_url', ''), info.get('domain', ''),
                 info.get('msn', ''), info.get('qq', ''),
                 info.get('email', ''), info.get('sex_tendancy', ''),

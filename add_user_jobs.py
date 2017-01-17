@@ -29,7 +29,7 @@ else:
 
 def add_jobs(target):
     todo = 0
-    dao = WeiboBlogsWriter(USED_DATABASE)
+    dao = WeiboUserWriterWeiboUserWriter(USED_DATABASE)
     for job in dao.read_new_user_from_db():  # iterate
         todo += 1
         if target.lrem(PEOPLE_JOBS_CACHE, 0, job):

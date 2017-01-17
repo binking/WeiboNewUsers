@@ -107,12 +107,7 @@ def add_jobs(target):
 
 def run_all_worker():
     r = redis.StrictRedis(**USED_REDIS)
-    if not r.llen(PEOPLE_JOBS_CACHE):
-        add_jobs(r)
-        print "Add jobs DONE, and I quit..."
-        return 0
-    else:
-        print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
+    print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
     job_pool = mp.Pool(processes=8,
         initializer=generate_info, initargs=(r, ))
     result_pool = mp.Pool(processes=4, 

@@ -38,9 +38,11 @@ def generate_info(cache):
     Producer for urls and topics, Consummer for topics
     """
     error_count = 0
+    loop_count = 0
     cp = mp.current_process()
     while True:
         res = {}
+        loop_count += 1
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
         try:
@@ -51,6 +53,9 @@ def generate_info(cache):
                 print 'Inactive user: %s' % job
                 continue
             all_account = cache.hkeys(NORMAL_COOKIES)
+            if len(all_account) == 0:
+                time.sleep(pow(2, loop_count))
+                continue
             account = random.choice(all_account)
             spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
             spider.use_abuyun_proxy()

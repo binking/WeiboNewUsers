@@ -49,9 +49,9 @@ def generate_info(cache):
             if error_count > 999:
                 print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
                 break
-            if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
-                print 'Inactive user: %s' % job
-                continue
+            # if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
+            #     print 'Inactive user: %s' % job
+            #     continue
             all_account = cache.hkeys(NORMAL_COOKIES)
             if len(all_account) == 0:
                 time.sleep(pow(2, loop_count))

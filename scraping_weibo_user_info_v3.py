@@ -46,8 +46,8 @@ def generate_info(cache):
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
         job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
         try:
-            if error_count > 999:
-                print '>'*10, 'Exceed 1000 times of gen errors', '<'*10
+            if error_count > 9999:
+                print '>'*10, 'Exceed 10000 times of gen errors', '<'*10
                 break
             # if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
             #     print 'Inactive user: %s' % job

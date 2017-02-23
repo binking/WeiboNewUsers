@@ -10,8 +10,8 @@ from datetime import datetime as dt
 import multiprocessing as mp
 from requests.exceptions import ConnectionError
 from zc_spider.weibo_config import (
-    WEIBO_ACCOUNT_PASSWD,
-    NORMAL_COOKIES, OUTER_MYSQL, QCLOUD_MYSQL,
+    WEIBO_ACCOUNT_PASSWD, WEIBO_COOKIES, 
+    OUTER_MYSQL, QCLOUD_MYSQL,
     LOCAL_REDIS, QCLOUD_REDIS, INACTIVE_USER_CACHE,
     PEOPLE_JOBS_CACHE, PEOPLE_RESULTS_CACHE  # weibo:people:urls, weibo:people:info
 )
@@ -52,7 +52,7 @@ def generate_info(cache):
             # if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
             #     print 'Inactive user: %s' % job
             #     continue
-            all_account = cache.hkeys(NORMAL_COOKIES)
+            all_account = cache.hkeys(WEIBO_COOKIES)
             if len(all_account) == 0:
                 time.sleep(pow(2, loop_count))
                 continue
@@ -60,7 +60,7 @@ def generate_info(cache):
             spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
             spider.use_abuyun_proxy()
             # spider.add_request_header()
-            spider.use_cookie_from_curl(cache.hget(NORMAL_COOKIES, account))
+            spider.use_cookie_from_curl(cache.hget(WEIBO_COOKIES, account))
             status = spider.gen_html_source()
             if status in [404, 20003]:
                 cache.sadd(INACTIVE_USER_CACHE, spider.url)

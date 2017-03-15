@@ -121,8 +121,10 @@ def run_all_worker():
     cp = mp.current_process()
     print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
     try:
-        job_pool.close(); result_pool.close()
-        job_pool.join(); result_pool.join()
+        job_pool.close(); 
+        result_pool.close()
+        job_pool.join(); 
+        result_pool.join()
         print "+"*10, "jobs' length is ", r.llen(PEOPLE_JOBS_CACHE) 
         print "+"*10, "results' length is ", r.llen(PEOPLE_RESULTS_CACHE)
     except Exception as e:

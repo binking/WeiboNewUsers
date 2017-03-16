@@ -62,8 +62,10 @@ def write_data(cache):
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
         print "Why stop ?? --> %d" % cache.llen(PEOPLE_RESULTS_CACHE)
         res = cache.blpop(PEOPLE_RESULTS_CACHE, 0)[1]
+        print '1'
         data = pickle.loads(res)
         try:
+            print '2'
             dao.insert_new_user_into_db(data)
         except Exception as e:  # won't let you died
             traceback.print_exc()

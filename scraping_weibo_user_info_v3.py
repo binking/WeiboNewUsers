@@ -92,11 +92,13 @@ def write_data(cache):
             break
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
         res = cache.blpop(PEOPLE_RESULTS_CACHE, 0)[1]
+        data = pickle.loads(res)
+        data['introduction'] = ''
         try:
-            dao.insert_new_user_into_db(pickle.loads(res))
+            dao.insert_new_user_into_db(data)
         except Exception as e:  # won't let you died
             traceback.print_exc()
-            print 'Failed to write result: ', str((pickle.loads(res)))
+            print 'Failed to write result: ', str(data)
             cache.rpush(PEOPLE_RESULTS_CACHE, res)
             error_count += 1
         except KeyboardInterrupt :

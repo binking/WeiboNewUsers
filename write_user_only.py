@@ -32,53 +32,6 @@ elif 'centos' in os.environ.get('HOSTNAME'):
 else:
     raise Exception("Unknown Environment, Check it now...")
 
-
-def generate_info(cache):
-    """
-    Producer for urls and topics, Consummer for topics
-    """
-    error_count = 0
-    loop_count = 0
-    cp = mp.current_process()
-    while True:
-        res = {}
-        loop_count += 1
-        print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Generate New User Process pid is %d" % (cp.pid)
-        job = cache.blpop(PEOPLE_JOBS_CACHE, 0)[1]
-        try:
-            if error_count > 9999:
-                print '>'*10, 'Exceed 10000 times of gen errors', '<'*10
-                break
-            # if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
-            #     print 'Inactive user: %s' % job
-            #     continue
-            all_account = cache.hkeys(WEIBO_COOKIES)
-            if len(all_account) == 0:
-                time.sleep(pow(2, loop_count))
-                continue
-            account = random.choice(all_account)
-            spider = WeiboUserSpider(job, account, WEIBO_ACCOUNT_PASSWD, timeout=20)
-            spider.use_abuyun_proxy()
-            # spider.add_request_header()
-            spider.use_cookie_from_curl(cache.hget(WEIBO_COOKIES, account))
-            status = spider.gen_html_source()
-            if status in [404, 20003]:
-                cache.sadd(INACTIVE_USER_CACHE, spider.url)
-                continue
-            res = spider.parse_bozhu_info()
-            if res:
-                cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))
-        except RedisException as e:
-            print str(e)
-            break
-        except Exception as e:  # no matter what was raised, cannot let process died
-            traceback.print_exc()
-            print 'Failed to parse job: ', job
-            cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
-            error_count += 1
-        time.sleep(2)
-        
-
 def write_data(cache):
     """
     Consummer for topics
@@ -87,7 +40,7 @@ def write_data(cache):
     cp = mp.current_process()
     dao = WeiboUserWriter(USED_DATABASE)
     while True:
-        if error_count > 9999:
+        if error_count > 999:
             print '>'*10, 'Exceed 1000 times of write errors', '<'*10
             break
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
@@ -121,17 +74,13 @@ def add_jobs(target):
 def run_all_worker():
     r = redis.StrictRedis(**USED_REDIS)
     print "Redis has %d records in cache" % r.llen(PEOPLE_JOBS_CACHE)
-    # job_pool = mp.Pool(processes=8,
-    #     initializer=generate_info, initargs=(r, ))
     result_pool = mp.Pool(processes=8,
         initializer=write_data, initargs=(r, ))
 
     cp = mp.current_process()
     print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
     try:
-        # job_pool.close(); 
         result_pool.close()
-        # job_pool.join(); 
         result_pool.join()
         print "+"*10, "jobs' length is ", r.llen(PEOPLE_JOBS_CACHE) 
         print "+"*10, "results' length is ", r.llen(PEOPLE_RESULTS_CACHE)

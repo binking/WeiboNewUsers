@@ -49,9 +49,9 @@ def generate_info(cache):
             if error_count > 9999:
                 print '>'*10, 'Exceed 10000 times of gen errors', '<'*10
                 break
-            # if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
-            #     print 'Inactive user: %s' % job
-            #     continue
+            if cache.sismember(INACTIVE_USER_CACHE, job) or len(job) < 10:
+                print 'Inactive user: %s' % job
+                continue
             all_account = cache.hkeys(WEIBO_COOKIES)
             if len(all_account) == 0:
                 time.sleep(pow(2, loop_count))
@@ -95,19 +95,12 @@ def write_data(cache):
         try:
             dao.insert_new_user_into_db(pickle.loads(res))
         except Exception as e:  # won't let you died
-            error_count += 1
+            traceback.print_exc()
             print 'Failed to write result: ', str((pickle.loads(res)))
             cache.rpush(PEOPLE_RESULTS_CACHE, res)
-
-
-def add_jobs(target):
-    todo = 0
-    dao = WeiboUserWriter(USED_DATABASE)
-    for job in dao.read_new_user_from_db():  # iterate
-        todo += 1
-        target.rpush(PEOPLE_JOBS_CACHE, job)
-    print 'There are totally %d jobs to process' % todo
-    return todo
+            error_count += 1
+        except KeyboardInterrupt :
+            cache.rpush(PEOPLE_RESULTS_CACHE, res)
 
 
 def run_all_worker():
@@ -117,7 +110,6 @@ def run_all_worker():
         initializer=generate_info, initargs=(r, ))
     result_pool = mp.Pool(processes=4, 
         initializer=write_data, initargs=(r, ))
-
     cp = mp.current_process()
     print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Run All Works Process pid is %d" % (cp.pid)
     try:

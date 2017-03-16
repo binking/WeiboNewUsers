@@ -73,7 +73,7 @@ def write_data(cache):
                 print k, 
                 print v
             print "+" * 30
-            data['introduction'] = emoji_pattern.sub('', data['introduction'])
+            data['introduction'] = emoji_pattern.sub('', data['introduction'].decode('utf8'))
             print data['introduction']
             cache.lpush(PEOPLE_RESULTS_CACHE, pickle.dumps(data))
 

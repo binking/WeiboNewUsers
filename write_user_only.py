@@ -74,7 +74,8 @@ def write_data(cache):
                 print v
             print "+" * 30
             data['introduction'] = emoji_pattern.sub('', data['introduction'])
-            cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(data))
+            print data['introduction']
+            cache.lpush(PEOPLE_RESULTS_CACHE, pickle.dumps(data))
 
 
 def add_jobs(target):

@@ -77,7 +77,6 @@ class WeiboUserSpider(WeiboSpider):
             elif '生日' in attr:
                 self.info['date_of_birth'] = value
             elif '简介' in attr:
-                import ipdb; ipdb.set_trace()
                 self.info['introduction'] = emoji_pattern.sub('', value.decode('utf8'))
             elif '邮箱' in attr:
                 self.info['email'] = value

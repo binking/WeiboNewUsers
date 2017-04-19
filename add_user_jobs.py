@@ -28,7 +28,7 @@ else:
 
 def add_jobs(target):
     todo = 0
-    if target.llen(PEOPLE_JOBS_CACHE) > 1000:
+    if target.llen(PEOPLE_JOBS_CACHE) > 100:
         print "There are still %d users ..." % (target.llen(PEOPLE_JOBS_CACHE))
         return 
     dao = WeiboUserWriter(USED_DATABASE)

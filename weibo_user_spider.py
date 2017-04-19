@@ -8,6 +8,20 @@ from bs4 import BeautifulSoup as bs
 from zc_spider.weibo_utils import catch_parse_error,extract_chinese_info
 from zc_spider.weibo_spider import WeiboSpider
 
+try:
+    # Wide UCS-4 build
+    emoji_pattern = re.compile(u'['
+        u'\U0001F300-\U0001F64F'
+        u'\U0001F680-\U0001F6FF'
+        u'\u2600-\u26FF\u2700-\u27BF]+', 
+        re.UNICODE)
+except re.error:
+    # Narrow UCS-2 build
+    emoji_pattern = re.compile(u'('
+        u'\ud83c[\udf00-\udfff]|'
+        u'\ud83d[\udc00-\ude4f\ude80-\udeff]|'
+        u'[\u2600-\u26FF\u2700-\u27BF])+', 
+        re.UNICODE)
 
 class WeiboUserSpider(WeiboSpider):
     def __init__(self, start_url, account, password, timeout=10, delay=1, proxy={}):
@@ -65,7 +79,7 @@ class WeiboUserSpider(WeiboSpider):
             elif '生日' in attr:
                 self.info['date_of_birth'] = value
             elif '简介' in attr:
-                self.info['introduction'] = value
+                self.info['introduction'] = emoji_pattern.sub('', value.decode('utf8'))
             elif '邮箱' in attr:
                 self.info['email'] = value
             elif 'QQ' in attr:

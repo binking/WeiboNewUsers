@@ -48,6 +48,8 @@ class WeiboUserSpider(WeiboSpider):
             return res
         for unit in info_units:
             attr, _, value = unit
+            if "<div class" in value:
+                continue
             if '昵称' in attr:
                 self.info['nickname'] = value
             elif '真实姓名' in attr:

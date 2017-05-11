@@ -68,12 +68,10 @@ def generate_info(cache):
             res = spider.parse_bozhu_info()
             if res:
                 cache.rpush(PEOPLE_RESULTS_CACHE, pickle.dumps(res))
-        except RedisException as e:
-            print str(e)
-            break
         except Exception as e:  # no matter what was raised, cannot let process died
             traceback.print_exc()
             print 'Failed to parse job: ', job
+            time.sleep(5)
             cache.rpush(PEOPLE_JOBS_CACHE, job) # put job back
             error_count += 1
         time.sleep(2)
@@ -87,8 +85,8 @@ def write_data(cache):
     cp = mp.current_process()
     dao = WeiboUserWriter(USED_DATABASE)
     while True:
-        if error_count > 999:
-            print '>'*10, 'Exceed 1000 times of write errors', '<'*10
+        if error_count > 9999:
+            print '>'*10, 'Exceed 10000 times of write errors', '<'*10
             break
         print dt.now().strftime("%Y-%m-%d %H:%M:%S"), "Write New User Process pid is %d" % (cp.pid)
         res = cache.blpop(PEOPLE_RESULTS_CACHE, 0)[1]
@@ -103,6 +101,7 @@ def write_data(cache):
             error_count += 1
         except KeyboardInterrupt :
             cache.rpush(PEOPLE_RESULTS_CACHE, res)
+            break
 
 
 def run_all_worker():
